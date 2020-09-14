@@ -4,7 +4,7 @@ Security operation is used in React and Spring Boot (with Redux and without Redu
 ## Using Tools & Technologies
 ### Backend
 ``` 
-- Spring Boot 2
+- Spring Boot 2.3.3
 - Spring Security, JWT
 - REST API (get, post, put, delete, patch)
 - Lombok
@@ -14,7 +14,7 @@ Security operation is used in React and Spring Boot (with Redux and without Redu
 ```
 ### Fackend
 ``` 
-- React 8
+- React
 - Redux
 - Alertify Js
 - Bootstrap 4,
