@@ -12,7 +12,7 @@ Security operation is used in React and Spring Boot (with Redux and without Redu
 - JPA, Hibernate
 - PostgreSql 12
 ```
-### Backend
+### Frontend
 ``` 
 - React
 - Redux
