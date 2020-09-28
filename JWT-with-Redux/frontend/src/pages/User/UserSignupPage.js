@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import UserService from '../../Services/UserService'; 
-import AlertifyService from '../../Services/AlertifyService';
 import Input from '../../components/input';
 import { withTranslation } from 'react-i18next';
+import {  signupHandler } from '../../redux/AuthenticationAction';
+import { connect } from 'react-redux';
 
 class UserSignupPage extends Component {
     constructor(props) {
@@ -21,7 +21,7 @@ class UserSignupPage extends Component {
         this.onChangeData = this.onChangeData.bind(this);
     }
 
-    onChangeData(type, event) {
+    onChangeData = (type, event) =>{
         const { t } = this.props;
 
         const stateData = this.state;
@@ -47,25 +47,12 @@ class UserSignupPage extends Component {
         e.preventDefault();
         this.setState({ errors: {} })
         let data = this.state;
-        console.log(data)
+        const { dispatch, history } = this.props;
         try {
-            const response = await UserService.post(this.state);
-            //to control that password and repeatPassword must be same
-            if (response.data.body.validationErrors) {
-                this.setState({ errors: response.data.body.validationErrors })
-            } else {
-                console.log(response)
-                this.setState({
-                    username: '',
-                    email: '',
-                    password: '',
-                    repeatPassword: "",
-                    name: '',
-                    surname: ''
-                });
-                this.setState({ errors: {} })
-                AlertifyService.successMessage("Kayıt işlemi başarılı")
-            }
+            const response = await dispatch(signupHandler(data));
+            console.log(response)
+            history.push("/index");
+  
         } catch (error) {
             if (error.response) {
                 console.log(error.response)
@@ -170,5 +157,5 @@ class UserSignupPage extends Component {
         )
     }
 }
-
-export default withTranslation()(UserSignupPage);
+const translation = withTranslation()(UserSignupPage);
+export default connect()(translation);

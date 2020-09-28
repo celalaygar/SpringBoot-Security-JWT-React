@@ -2,7 +2,7 @@
 import React from 'react'
 
 const Input = (props) => {
-    const {label,error,name,valueName,onChangeData,type, placeholder} = props;
+    const {label,error,name,valueName,onChangeData,type, placeholder,defaultValue} = props;
     const className= error ? "form-control is-invalid" : "form-control";
    
         return (
@@ -13,6 +13,7 @@ const Input = (props) => {
                     name={name}
                     onChange={e => onChangeData(name, e.target.value)}
                     value={valueName}
+                    defaultValue={defaultValue}
                     placeholder={placeholder}  />
                 <div className="invalid-feedback">{error}</div>
             </div>
