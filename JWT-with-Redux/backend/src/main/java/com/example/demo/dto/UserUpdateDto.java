@@ -22,7 +22,7 @@ import lombok.Setter;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class UserUpdateDto {
 	private Long id;
 	
 	private String username;
@@ -32,23 +32,19 @@ public class UserDto {
 	private String surname;
 
 	private String email;
-
-	private String repeatPassword;
 	
 	private Date bornDate;
-	 
-	private String image;
 	
-	public String getFullName() {
-		return this.name+" "+this.surname;
-	}
-	public UserDto(User user) {
-		this.id=user.getId();
-		this.username=user.getUsername();
-		this.name=user.getName();
-		this.surname=user.getSurname();
-		this.email=user.getEmail();
-		this.bornDate=user.getBornDate();
-		this.image=user.getImage();
-	}
+	@Lob
+	private String image;
+
+//	public UserUpdateDto(User user) {
+//		this.id=user.getId();
+//		this.username=user.getUsername();
+//		this.name=user.getName();
+//		this.surname=user.getSurname();
+//		this.email=user.getEmail();
+//		this.bornDate=user.getBornDate();
+//		this.image=user.getImage();
+//	}
 }
