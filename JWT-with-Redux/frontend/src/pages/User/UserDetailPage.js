@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, withRouter } from 'react-router-dom';
+import Input from '../../components/input';
 import UpdateUserForm from '../../components/UpdateUserForm';
 import UserCard from '../../components/UserCard'
 import AlertifyService from '../../Services/AlertifyService';
@@ -11,6 +12,7 @@ const UserDetailPage = (props) => {
     const [user, setUser] = useState({});
     const [notFound, setNotFound] = useState(false);
     const [newImage, setNewImage] = useState();
+    const [errorImage, setErrorImage] = useState();
     const [editable, setEditable] = useState(false);
     const [inEditMode, setInEditMode] = useState(false);
     const { username } = useParams(); // this.props.match.params.username
@@ -27,11 +29,11 @@ const UserDetailPage = (props) => {
     })
     //console.log(reduxStore)
     useEffect(() => {
-
         loadUser();
-    }, [username,inEditMode,editable])
+    }, [username, inEditMode, editable])
 
     const loadUser = async () => {
+        console.log(username)
         setNotFound(false)
         setEditable(false);
         if (reduxStore.username === username) {
@@ -47,43 +49,54 @@ const UserDetailPage = (props) => {
             setNotFound(true);
         }
     }
-    const showUpdateForm = (control) =>{
+    const showUpdateForm = (control) => {
         setInEditMode(control);
-        !control && setNewImage(undefined) 
+        if (!control) {
+            setErrorImage(undefined);
+            setNewImage(undefined);
+        }
     }
-    const saveImage = async (e) =>{
+    const saveImage = async (e) => {
+        setErrorImage(undefined)
         //data:image/jpeg;base64,/9j/4AAQSkZJRgA
         e.preventDefault();
-        let body = { ...user};
-        if(newImage){
-            body ['image']= newImage.split(",")[1];
+        let body = { ...user };
+        if (newImage) {
+            body['image'] = newImage.split(",")[1];
             try {
-                const response = await UserService.update(username, body);
+                //console.log(body)
+                const response = await UserService.loadImage(username, body);
                 console.log(response.data)
-                showUpdateForm(false)
-                AlertifyService.successMessage("User Image Updated..");
+                if (response.data.body.message) {
+                    setErrorImage(response.data.body.message);
+                    AlertifyService.alert(response.data.body.message);
+                }
+                else {
+                    AlertifyService.successMessage("User Image Updated..");
+                    showUpdateForm(false)
+                }
             } catch (error) {
                 if (error.response) {
                     console.log(error.response)
-                    if (error.response.data.validationErrors) {
-                        console.log(error.response.data.validationErrors);
-                        this.setState({ errors: error.response.data.validationErrors })
+                    if(error.response.data.validationErrors.image){
+                        setErrorImage(error.response.data.validationErrors.image);
+                        AlertifyService.error(error.response.data.validationErrors.image);
                     }
                 }
                 else if (error.request)
                     console.log(error.request);
                 else
                     console.log(error.message);
-            } 
-        }else{
+            }
+        } else {
             AlertifyService.alert("User Image Not Updated..");
         }
 
 
     }
-    const onChangeData = (type, event) =>{
-        if(event.target.files.length <1){
-            return ;
+    const onChangeData = (type, event) => {
+        if (event.target.files.length < 1) {
+            return;
         }
         const file = event.target.files[0];
         const fileReader = new FileReader();
@@ -98,55 +111,77 @@ const UserDetailPage = (props) => {
                 <div className="alert alert-danger">User not found !!</div>
             </div>
         )
-    } else if(!notFound) {
+    } else if (!notFound) {
         return (
             <div className="col-lg-12">
                 <h5>{t('User Detail')} </h5>
                 <hr />
                 <UserCard
-                    user     = {user}
-                    newImage = {newImage}
-                    editable = {editable}
-                    username = {username}
+                    user={user}
+                    newImage={newImage}
+                    editable={editable}
+                    username={username}
                 />
                 {
                     editable &&
                     <div className="card-body">
-                        { !inEditMode ?
-                            <button 
-                                onClick={e => showUpdateForm(true)} 
-                                className="btn btn-sm btn-success">{t('Edit')}</button> 
-                                :
-                            <button 
-                                onClick={e => showUpdateForm(false)} 
+                        {!inEditMode ?
+                            <button
+                                onClick={e => showUpdateForm(true)}
+                                className="btn btn-sm btn-success">{t('Edit')}</button>
+                            :
+                            <button
+                                onClick={e => showUpdateForm(false)}
                                 className="btn btn-sm btn-danger">{t('Cancel')} </button>
 
                         }
-                        
+
                     </div>
                 }
                 { inEditMode &&
-                    <>
-                        <ul className="list-group list-group-flush ">
-                            <li className="list-group-item">
-                                <b>Resim Değiştir : </b>
-                                <input type="file" onChange={event=> onChangeData("image",event)}/>
-                                <button 
-                                onClick={saveImage} 
-                                className="btn btn-sm btn-primary">{t('Save')} </button>
-                                <button 
-                                    onClick={e => showUpdateForm(false)} 
-                                    className="btn btn-sm btn-danger">{t('Cancel')} </button>
-                            </li>
-                        </ul>
-                        <UpdateUserForm 
-                            user = {user}
-                            inEditMode = {inEditMode}
-                            newImage = {newImage}
-                            showUpdateForm={showUpdateForm}
-                        />
-                    </>
+                    <div className="row">
+                        <div className="col-sm-7">
+                            <UpdateUserForm
+                                user={user}
+                                inEditMode={inEditMode}
+                                newImage={newImage}
+                                showUpdateForm={showUpdateForm}
+                            />
+                        </div>
+                        <div className="col-sm-5">
+                            <h5 className="card-header text-center"><b>{t("Change Image")}</b></h5>
+                            <ul className="list-group list-group-flush ">
+                                <li className="list-group-item" style={{ color: "red" }}> png or jpeg format </li>
+                                <li className="list-group-item">
+
+                                    <Input
+                                        error={errorImage}
+                                        name="image"
+                                        type="file"
+                                        onChangeData={onChangeData}
+                                    // onChangeData={event => onChangeData("image", event)} 
+                                    />
+
+                                </li>
+                                <li className="list-group-item">
+                                    <button
+                                        onClick={saveImage}
+                                        className="btn btn-sm btn-primary">{t('Save')} </button>
+                                    <button
+                                        onClick={e => showUpdateForm(false)}
+                                        className="btn btn-sm btn-danger">{t('Cancel')} </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
                 }
+                <hr />
+                <hr />
+                <hr />
+                <hr />
+                <hr />
+                <hr />
             </div>
         )
     }
@@ -163,4 +198,4 @@ const UserDetailPage = (props) => {
 // };
 // export default connect(mapStateToProps)(withRouter(ProfileCard)) ;
 //export default connect(mapStateToProps)(serDetailPage);
-export default UserDetailPage;
+export default withRouter(UserDetailPage) ;

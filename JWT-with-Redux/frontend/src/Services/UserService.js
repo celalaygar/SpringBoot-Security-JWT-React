@@ -20,6 +20,9 @@ class UserService {
     update(username,body) { 
         return ApiService.put(USER_URL+"/"+username,body)
     }
+    loadImage(username,body) { 
+        return ApiService.put(USER_URL+"/upload-image/"+username,body)
+    }
     //put(url, data) { return axios.put(API_BASE_URL + url, data); }
 
     //delete(url) { return axios.delete(API_BASE_URL + url); }

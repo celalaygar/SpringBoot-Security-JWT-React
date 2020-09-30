@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import Input from '../../components/input';
 import { withTranslation } from 'react-i18next';
-import {  signupHandler } from '../../redux/AuthenticationAction';
+import { signupHandler } from '../../redux/AuthenticationAction';
 import { connect } from 'react-redux';
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 class UserSignupPage extends Component {
     constructor(props) {
         super(props);
@@ -15,13 +16,14 @@ class UserSignupPage extends Component {
             repeatPassword: "",
             name: '',
             surname: '',
+            bornDate: new Date(), 
             errors: {
             }
         };
         this.onChangeData = this.onChangeData.bind(this);
     }
 
-    onChangeData = (type, event) =>{
+    onChangeData = (type, event) => {
         const { t } = this.props;
 
         const stateData = this.state;
@@ -30,6 +32,7 @@ class UserSignupPage extends Component {
         const errors = { ...this.state.errors }
         errors[type] = undefined;
 
+        //match both of password for same
         if (type === 'password' || type === "repeatPassword") {
             if (type === 'password' && event !== this.state.repeatPassword) {
                 errors.repeatPassword = t('Password mismatch');
@@ -52,7 +55,7 @@ class UserSignupPage extends Component {
             const response = await dispatch(signupHandler(data));
             console.log(response)
             history.push("/index");
-  
+
         } catch (error) {
             if (error.response) {
                 console.log(error.response)
@@ -81,11 +84,15 @@ class UserSignupPage extends Component {
         //     else 
         //         console.log(error.message);
         // });
-    } 
+    }
     render() {
         const { username, email, password, repeatPassword } = this.state.errors;
         //const {errorUsername, errorEmail, errorPassword} = errors;
         const { t } = this.props;
+        const isWeekday = date => {
+            const day = date.getDay(date);
+            return day !== 0 && day !== 6;
+        };
         return (
             <div className="col-lg-12">
                 <h3>{t('Sign Up')}</h3>
@@ -146,6 +153,23 @@ class UserSignupPage extends Component {
                         valueName={this.state.surname}
                         onChangeData={this.onChangeData}
                     />
+                    <div className="form-group">
+                        <label>Born Date *</label>
+                        <div className="form-group">
+                            <DatePicker
+                                className="form-control"
+                                // showTimeSelect
+                                showTimeInput
+                                selected={this.state.bornDate}
+                                onChange={e => this.onChangeData('bornDate', e)}
+                                filterDate={isWeekday}          // disable weekend
+                                timeIntervals={15}              // time range around 15 min
+                                //showWeekNumbers               // show week number
+                                timeFormat="HH:mm"              // show time format
+                                dateFormat="yyyy/MM/dd h:mm aa" // show all of time format
+                            />
+                        </div>
+                    </div>
                     <button
                         className="btn btn-primary "
                         type="button"

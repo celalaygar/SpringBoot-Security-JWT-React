@@ -11,16 +11,18 @@ export const loginAction = (authData) => {
     return { type: ACTIONS.LOGIN_ACTION, payload: authData };
 };
 
+export const updateUser = (updateDate) =>{
+    return {type : ACTIONS.UPDATE_ACTION, payload: updateDate }
+}
 export const loginHandler = (cridentials) => {
     return  (async (dispatch) => {
         const response = await  ApiService.login(cridentials)
         if (response) {
-            console.log(response.data);
+            //console.log(response.data);
             const authState = {
                 ...response.data,
                 isLoggedIn: true,
-                password: cridentials.password,
-                image: "https://i.milliyet.com.tr/MolatikDetayBig/2019/04/12/fft371_mf32728256.Jpeg"
+                password: cridentials.password
             }
             ApiService.changeAuthToken(response.data.jwttoken);
             dispatch(loginAction(authState));

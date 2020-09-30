@@ -2,10 +2,11 @@ import defaultPicture from "../assets/profile.png"
 import React, { useEffect, useState } from 'react'
 import ProfileImage from "./ProfileImage";
 import { BACKEND_IMAGE_URL } from "../Shared/config";
+import Moment from "react-moment";
 
 const UserCard = (props) => {
     const [user, setUser] = useState({});
-    const {  username,  fullName, image, email, bornDate } = user;
+    const {  username,name,surname,  fullName, image, email, bornDate } = user;
     let imageSource = defaultPicture;
     // const { t } = useTranslation();
 
@@ -33,8 +34,13 @@ const UserCard = (props) => {
                 <ul className="list-group list-group-flush ">
                     <li className="list-group-item"><b>username :</b> {username}</li>
                     <li className="list-group-item"><b>Full Name :</b> {fullName}</li>
+                    <li className="list-group-item"><b>Name :</b> {name}</li>
+                    <li className="list-group-item"><b>SurName :</b> {surname}</li>
                     <li className="list-group-item"><b>email : </b>{email}</li>
-                    <li className="list-group-item"><b>bornDate :</b> {bornDate}</li>
+                    <li className="list-group-item">
+                        <b>bornDate : </b>
+                        <Moment format="YYYY / MM / DD  HH:mm">{bornDate}</Moment>
+                    </li>
                 </ul>
             </div>
             <hr />
