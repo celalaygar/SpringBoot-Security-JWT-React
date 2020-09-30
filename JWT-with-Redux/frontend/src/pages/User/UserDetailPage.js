@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams, withRouter } from 'react-router-dom';
 import Input from '../../components/input';
 import UpdateUserForm from '../../components/UpdateUserForm';
 import UserCard from '../../components/UserCard'
+import { updateUser } from '../../redux/AuthenticationAction';
 import AlertifyService from '../../Services/AlertifyService';
 import UserService from '../../Services/UserService';
 
@@ -17,6 +18,7 @@ const UserDetailPage = (props) => {
     const [inEditMode, setInEditMode] = useState(false);
     const { username } = useParams(); // this.props.match.params.username
     const { t } = useTranslation();
+    const dispatch = useDispatch();
     const reduxStore = useSelector((store) => {
         return {
             isLoggedIn: store.isLoggedIn,
@@ -66,12 +68,15 @@ const UserDetailPage = (props) => {
             try {
                 //console.log(body)
                 const response = await UserService.loadImage(username, body);
-                console.log(response.data)
+                //console.log(response.data)
                 if (response.data.body.message) {
                     setErrorImage(response.data.body.message);
                     AlertifyService.alert(response.data.body.message);
                 }
                 else {
+                    let authData= {...reduxStore, image: response.data.body.image}
+                    //console.log(authData)
+                    dispatch(updateUser(authData));
                     AlertifyService.successMessage("User Image Updated..");
                     showUpdateForm(false)
                 }
