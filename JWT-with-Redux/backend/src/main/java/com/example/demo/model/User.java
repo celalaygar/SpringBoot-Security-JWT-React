@@ -67,6 +67,7 @@ public class User {
 
 	@Column(name = "email", unique = true)
 	@NotEmpty
+	@NotNull
 	@Size(min = 5, max = 200)
 	private String email;
 

@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.UploadImageDto;
 import com.example.demo.dto.UserDto;
 import com.example.demo.dto.UserUpdateDto;
 import com.example.demo.error.ApiError;
@@ -65,11 +66,15 @@ public class UserApi {
 
 	@PutMapping("/{username}")
 	public ResponseEntity<?> updateUser(@RequestHeader("Authorization") String authHeader,
-			@PathVariable String username, @RequestBody UserUpdateDto dto) {
+			@PathVariable String username,@Valid @RequestBody UserUpdateDto dto) {
 
 		return ResponseEntity.ok(service.updateUser(authHeader, username, dto));
 	}
-
+	@PutMapping("/upload-image/{username}")
+	public ResponseEntity<?> uploadImage(@RequestHeader("Authorization") String authHeader,
+			@PathVariable String username,@RequestBody UploadImageDto dto) { 
+		return ResponseEntity.ok(service.uploadImage(authHeader, username, dto));
+	}
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Boolean> deleteUser(@PathVariable Long id) {
 

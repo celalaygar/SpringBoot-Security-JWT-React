@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.example.demo.dto.UploadImageDto;
 import com.example.demo.dto.UserDto;
 import com.example.demo.dto.UserUpdateDto;
 import com.example.demo.error.ApiError;
@@ -54,7 +55,7 @@ public class UserServiceImp implements UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenUtil tokenUtil;
 	private final FileService fileService;
-	
+	private String[] types = {"image/png","image/jpeg"};
 	@Override
 	@Transactional
 	public Page<UserDto> getAll(Pageable page, String authHeader) { 
@@ -164,16 +165,16 @@ public class UserServiceImp implements UserService {
 			throw new NotFoundException();
 			//throw new IllegalArgumentException("There is no user with " + id);
 		}
-		if(dto.getImage() != null) {
-			String oldImage = user.getImage();
-			try {
-				String fileName = fileService.writeBase64StringToFile(dto.getImage());
-				user.setImage(fileName);
-			} catch (IOException e) { 
-				e.printStackTrace();
-			}
-			fileService.deleteFile(oldImage);
-		}
+//		if(dto.getImage() != null) {
+//			String oldImage = user.getImage();
+//			try {
+//				String fileName = fileService.writeBase64StringToFile(dto.getImage());
+//				user.setImage(fileName);
+//			} catch (IOException e) { 
+//				e.printStackTrace();
+//			}
+//			fileService.deleteFile(oldImage);
+//		}
 		user.setUsername(dto.getUsername());
 		user.setEmail(dto.getEmail());
 		user.setName(dto.getName());
@@ -185,5 +186,36 @@ public class UserServiceImp implements UserService {
 		return ResponseEntity.ok(result);
 	}
 
-
+	public  ResponseEntity<?> uploadImage(String authHeader, String username, UploadImageDto dto){
+		String userNameFromToken = getUsernameFromToken(authHeader);
+		if(!userNameFromToken.equals(username)){
+			logger.error("User Names cannot match");
+			ApiError error = new ApiError(403, "User Names cannot match", "api/user/"+authHeader);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+		}
+		User user = repository.findUserByUsernameWithStatusOne(username);
+		if (user==null) {
+			logger.error("There is no user with " + username);
+			throw new NotFoundException();
+			//throw new IllegalArgumentException("There is no user with " + id);
+		}
+		if(dto.getImage() != null) {
+			String oldImage = user.getImage();
+			try {
+				if(!fileService.isValidFileType(types,dto.getImage())) {
+					ApiError error = new ApiError(400, "Image Type invalid", "api/user/upload-image/"+authHeader);
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+				} 
+				String fileName = fileService.writeBase64StringToFile(dto.getImage());
+				user.setImage(fileName);
+			} catch (IOException e) { 
+				e.printStackTrace();
+			}
+			fileService.deleteFile(oldImage);
+		}
+		user = repository.save(user);
+		UserDto result = mapper.map(user, UserDto.class);
+		logger.info("User updated");
+		return ResponseEntity.ok(result);
+	}
 }
